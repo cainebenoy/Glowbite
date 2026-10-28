@@ -5,7 +5,8 @@ export const BOM = "﻿";
 export function csvCell(value: unknown): string {
   if (value === null || value === undefined) return "";
   let s = typeof value === "object" ? JSON.stringify(value) : String(value);
-  if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+  // A leading = @ tab or CR, or a +/- that isn't just a signed number (e.g. "+91 98765 43210"), could run as a formula.
+  if (/^[=@\t\r]/.test(s) || /^[+-](?![\d ]+$)/.test(s)) s = "'" + s;
   return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 

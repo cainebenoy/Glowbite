@@ -27,7 +27,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en-IN" className={outfit.variable}>
       <body>
         {children}
-        <Analytics />
+        {/* Vercel Web Analytics only exists on Vercel deployments */}
+        {process.env.VERCEL && <Analytics />}
       </body>
     </html>
   );

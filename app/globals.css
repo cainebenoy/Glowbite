@@ -73,7 +73,8 @@ html.lenis body {
 .site p {
   margin: 0;
 }
-.site a {
+/* zero-specificity so component colours (e.g. the ink CTA's dark label) win */
+:where(.site) a {
   color: inherit;
 }
 .site::before {
@@ -297,6 +298,12 @@ html.lenis body {
 }
 .right .copy {
   justify-content: flex-end;
+}
+@media (min-width: 861px) {
+  /* keep right-aligned copy clear of the chapter rail */
+  .right .copy {
+    padding-right: 96px;
+  }
 }
 .tag {
   font: 500 0.72rem/1 var(--f-sans);

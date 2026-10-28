@@ -92,7 +92,9 @@ function Studio({ device, onFirstFrame }: { device: DeviceHandles; onFirstFrame:
 
   // composer: background + scene, bloom (low strength, high threshold), output (ACES + sRGB)
   const composer = useMemo(() => {
-    const c = new EffectComposer(gl);
+    // multisampled target: the bloom pipeline would otherwise bypass the canvas MSAA and leave jagged edges
+    const rt = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: lowPower ? 2 : 4 });
+    const c = new EffectComposer(gl, rt);
     c.addPass(new RenderPass(scene, camera));
     const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), lowPower ? 0.32 : 0.4, 0.65, 0.78);
     c.addPass(bloom);
@@ -185,7 +187,8 @@ function Studio({ device, onFirstFrame }: { device: DeviceHandles; onFirstFrame:
     const tankIdx = ids.indexOf("tank");
     const fT = S >= tankIdx + 0.5 ? 0.95 : 0.1 + 0.85 * Math.min(1, Math.max(0, (ST.t.tank ?? 0) / 0.6));
     s.fill += (fT - s.fill) * (reduced || s.first ? 1 : 1 - Math.pow(0.02, dt));
-    device.water.scale.y = Math.max(0.01, s.fill * 1.03);
+    device.setFill(s.fill);
+    device.updateBubbles(time, dt, s.fill, reduced ? 0 : Math.max(0, 1 - Math.abs(S - tankIdx) * 1.5));
 
     const throb = reduced ? 1 : 0.94 + 0.06 * Math.sin(time * 0.9) + s.pulse * 0.12;
     device.shadowMat.opacity = (0.35 + s.fill * 0.4) * throb;
@@ -377,7 +380,7 @@ export default function Stage({ hasGlb }: { hasGlb: boolean }) {
       frameloop={running ? "always" : "never"}
       dpr={[1, maxDpr]}
       camera={{ fov: 30, near: 0.05, far: 100, position: [0, 2.5, 9] }}
-      gl={{ antialias: true, powerPreference: "high-performance", alpha: false }}
+      gl={{ antialias: false, powerPreference: "high-performance", alpha: false }}
       style={{ position: "fixed", pointerEvents: "none" }}
     >
       <Device hasGlb={hasGlb} onReady={onReady} />

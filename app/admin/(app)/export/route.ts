@@ -40,7 +40,7 @@ export async function GET(request: Request) {
     rows.map((r) => [
       isoIST(r.created_at),
       r.full_name,
-      r.phone,
+      r.phone.replace(/^\+91(\d{5})(\d{5})$/, "+91 $1 $2"), // spaced so spreadsheets keep it as text
       r.email,
       r.pin_code,
       r.quantity,

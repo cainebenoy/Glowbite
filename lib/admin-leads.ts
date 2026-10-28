@@ -50,7 +50,7 @@ export function filterQuery(f: LeadFilters): string {
 }
 
 /** Search text safe for a PostgREST `or` filter (strip syntax and wildcard characters). */
-export const searchTerm = (q: string) => q.replace(/[%_,()*\:"'.]/g, " ").trim().replace(/\s+/g, " ");
+export const searchTerm = (q: string) => q.replace(/[%_,()*\\:"'.]/g, " ").trim().replace(/\s+/g, " ");
 
 export function leadsQuery(f: LeadFilters, columns = "*", opts?: { count?: "exact" }) {
   let query = createAdminClient().from("leads").select(columns, opts).order("created_at", { ascending: false });

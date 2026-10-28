@@ -11,6 +11,24 @@ export const BODY: [number, number][] = [
   [0.338, 2.885], [0.305, 2.918], [0.262, 2.943], [0.205, 2.962], [0.14, 2.975], [0, 2.985],
 ];
 
+// clear tank outline (bottom of tank = 0)
+export const TANK: [number, number][] = [
+  [0.0, 0.0], [0.43, 0.0], [0.458, 0.012], [0.4625, 0.05], [0.4525, 0.2], [0.4425, 0.32], [0.425, 0.52],
+  [0.4075, 0.695], [0.392, 0.95], [0.38, 1.195], [0.376, 1.245],
+];
+const profileAt = (pts: [number, number][], y: number) => {
+  for (let i = 1; i < pts.length - 1; i++) {
+    const [r0, y0] = pts[i]!,
+      [r1, y1] = pts[i + 1]!;
+    if (y >= y0 && y <= y1) return r0 + ((r1 - r0) * (y - y0)) / (y1 - y0);
+  }
+  return pts[pts.length - 1]![0];
+};
+/** Inner wall radius of the tank at height y (outer profile minus the wall). */
+export const tankInnerAt = (y: number) => profileAt(TANK, Math.max(0.05, y)) - 0.016;
+export const WATER_BASE = 0.06;
+export const WATER_MAX = 1.1; // just under the cap
+
 /** Body radius at height y (front-view half width). */
 export function radiusAt(y: number): number {
   for (let i = 0; i < BODY.length - 1; i++) {
@@ -37,6 +55,10 @@ export type DeviceHandles = {
   dev: THREE.Group;
   water: THREE.Object3D;
   waterMat: THREE.MeshPhysicalMaterial | null;
+  /** fill 0..1 of the tank */
+  setFill: (f: number) => void;
+  /** rising bubbles inside the water; amount 0..1 */
+  updateBubbles: (time: number, dt: number, fill: number, amount: number) => void;
   dotMats: THREE.MeshStandardMaterial[];
   tip: THREE.Object3D;
   tipEnd: THREE.Vector3;
@@ -260,16 +282,77 @@ export function buildDevice(opts: { lowPower: boolean; logoFont: string }): Devi
   };
 
   // tank: clear, slightly flared toward the base, thick clear floor
-  const tank = add(lathe([[0.0, 0.0], [0.43, 0.0], [0.458, 0.012], [0.4625, 0.05], [0.4525, 0.2], [0.4425, 0.32], [0.425, 0.52], [0.4075, 0.695], [0.392, 0.95], [0.38, 1.195], [0.376, 1.245]]), M.tank);
+  const tank = add(lathe(TANK), M.tank);
   tank.scale.z = OVAL;
   tank.renderOrder = 4;
   const floor = add(new THREE.CylinderGeometry(0.44, 0.455, 0.05, 96), M.clear);
   floor.position.y = 0.03;
   floor.scale.z = OVAL;
-  const water = add(lathe([[0, 0], [0.43, 0], [0.43, 0.02], [0.36, 1], [0, 1]]), M.water);
-  water.position.y = 0.06;
-  water.scale.set(1, 0.1, OVAL);
+  // water: a lathe whose profile is rebuilt in place so the surface always meets the tapered walls
+  const WP = 14,
+    WSEG = 96;
+  const waterGeo = new THREE.LatheGeometry(Array.from({ length: WP }, (_, i) => new THREE.Vector2(i === 0 || i === WP - 1 ? 0 : 0.4, i / (WP - 1))), WSEG);
+  const water = add(waterGeo, M.water);
+  water.position.y = WATER_BASE;
+  water.scale.z = OVAL;
   water.renderOrder = 2;
+  let lastFill = -1;
+  const setFill = (fill: number) => {
+    const f = Math.max(0.01, Math.min(1, fill));
+    if (Math.abs(f - lastFill) < 0.0008) return;
+    lastFill = f;
+    const h = f * (WATER_MAX - WATER_BASE);
+    const pos = waterGeo.attributes.position as THREE.BufferAttribute;
+    for (let i = 0; i <= WSEG; i++) {
+      const phi = (i / WSEG) * Math.PI * 2,
+        sin = Math.sin(phi),
+        cos = Math.cos(phi);
+      for (let j = 0; j < WP; j++) {
+        // floor centre, wall points from bottom to surface (a soft meniscus at the top), surface centre
+        const y = j === 0 ? 0 : j === WP - 1 ? h : (h * (j - 1)) / (WP - 3);
+        const yy = Math.min(y, h);
+        const r = j === 0 || j === WP - 1 ? 0 : tankInnerAt(WATER_BASE + yy) - (j === WP - 2 ? 0.006 : 0);
+        pos.setXYZ(i * WP + j, r * sin, yy, r * cos);
+      }
+    }
+    pos.needsUpdate = true;
+    waterGeo.computeVertexNormals();
+    waterGeo.computeBoundingSphere();
+  };
+  setFill(0.1);
+
+  // rising bubbles inside the water (tank scene)
+  const BN = 22;
+  const bubbleMat = new THREE.MeshBasicMaterial({ color: NEON(0xdff6ff, 1.1), transparent: true, opacity: 0.55, depthWrite: false, blending: THREE.AdditiveBlending });
+  const bubbles = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 10, 8), bubbleMat, BN);
+  bubbles.frustumCulled = false;
+  bubbles.renderOrder = 3;
+  dev.add(bubbles);
+  const bd = Array.from({ length: BN }, () => ({ a: Math.random() * Math.PI * 2, rr: Math.sqrt(Math.random()) * 0.78, y: Math.random(), v: 0.12 + Math.random() * 0.2, r: 0.006 + Math.random() * 0.012, ph: Math.random() * 6.28 }));
+  const bDummy = new THREE.Object3D();
+  const updateBubbles = (time: number, dt: number, fill: number, amount: number) => {
+    const h = Math.max(0.01, fill) * (WATER_MAX - WATER_BASE);
+    bubbles.visible = amount > 0.01;
+    if (!bubbles.visible) return;
+    for (let i = 0; i < BN; i++) {
+      const b = bd[i]!;
+      b.y += (b.v * dt) / Math.max(0.2, h);
+      if (b.y > 1) {
+        b.y = 0;
+        b.a = Math.random() * Math.PI * 2;
+      }
+      const y = WATER_BASE + 0.02 + b.y * (h - 0.03);
+      const R = tankInnerAt(y) * b.rr - b.r;
+      const wob = Math.sin(time * 2.2 + b.ph) * 0.012;
+      bDummy.position.set(Math.cos(b.a) * R + wob, y, Math.sin(b.a) * R * OVAL);
+      // grow slightly as they rise, pop at the surface
+      const s = b.r * amount * (0.7 + 0.5 * b.y) * Math.min(1, (1 - b.y) * 12);
+      bDummy.scale.setScalar(Math.max(0.00001, s));
+      bDummy.updateMatrix();
+      bubbles.setMatrixAt(i, bDummy.matrix);
+    }
+    bubbles.instanceMatrix.needsUpdate = true;
+  };
 
   // white cap at the top of the tank + hose (visible through the clear walls)
   add(lathe([[0, 1.12], [0.35, 1.12], [0.362, 1.14], [0.37, 1.245], [0, 1.245]]), M.shell).scale.z = OVAL;
@@ -352,17 +435,18 @@ export function buildDevice(opts: { lowPower: boolean; logoFont: string }): Devi
 
   // three indicator dots (the unit shows 3; copy says 5 modes until confirmed)
   const dotMats = [0, 1, 2].map(() => new THREE.MeshStandardMaterial({ color: 0x9aa3ab, emissive: 0x5cd6ff, emissiveIntensity: 0.2, roughness: 0.4 }));
-  [2.3575, 2.27, 2.19].forEach((y, i) => {
+  [2.305, 2.24, 2.175].forEach((y, i) => {
     add(new THREE.SphereGeometry(0.007, 12, 10), dotMats[i]!).position.set(0, y, surfZ(0, y) + 0.006);
   });
 
   // printed logo: "Gl⚡wbite" in grey, wrapped onto the body
   const logoCv = document.createElement("canvas");
-  logoCv.width = 1024;
-  logoCv.height = 256;
+  logoCv.width = 2048;
+  logoCv.height = 512;
   const logoTex = canvasTexture(logoCv);
   const redrawLogo = () => {
     const g = logoCv.getContext("2d")!;
+    g.setTransform(2, 0, 0, 2, 0, 0); // drawn at 2x for a crisper print
     g.clearRect(0, 0, 1024, 256);
     g.fillStyle = "#8c9198";
     g.font = `600 150px ${opts.logoFont}, "Helvetica Neue", Arial, sans-serif`;
@@ -408,6 +492,8 @@ export function buildDevice(opts: { lowPower: boolean; logoFont: string }): Devi
     ...common,
     water,
     waterMat: M.water,
+    setFill,
+    updateBubbles,
     dotMats,
     tip,
     tipEnd: new THREE.Vector3(0, 0.9, 0.1),
@@ -445,6 +531,10 @@ export function adoptGltf(scene: THREE.Object3D, opts: { lowPower: boolean }): D
     ...common,
     water,
     waterMat,
+    setFill: (f: number) => {
+      water.scale.y = Math.max(0.01, f);
+    },
+    updateBubbles: () => {},
     dotMats,
     tip,
     tipEnd: new THREE.Vector3(0, 0, 0),
