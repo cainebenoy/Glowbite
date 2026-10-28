@@ -1,0 +1,8 @@
+allowBuilds:
+  unrs-resolver: true
+  supabase: true
+  esbuild: true
+  sharp: true
+publicHoistPattern:
+  - "*eslint*"
+  - "@next/eslint-plugin-next"
