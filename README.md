@@ -68,7 +68,7 @@ To remove someone, delete the row from `admins` and delete the user under Authen
 ## For developers
 
 ### Stack
-Next.js 15 (App Router, strict TS) · React 19 · Tailwind CSS v4 · three.js via @react-three/fiber · Lenis · Zustand · Supabase (Postgres, Auth, RLS) · Zod · Resend · Cloudflare Turnstile · @vercel/analytics · Vitest · Playwright · pnpm · Vercel.
+Next.js 15 (App Router, strict TS) · React 19 · Tailwind CSS v4 · three.js (plain; EffectComposer + UnrealBloomPass) · Lenis · Zustand · Supabase (Postgres, Auth, RLS) · Zod · Resend · Cloudflare Turnstile · @vercel/analytics · Vitest · Playwright · pnpm · Vercel.
 
 ### Local setup
 Requirements: Node 20+, pnpm, Docker Desktop running. The Supabase CLI is a dev dependency (`pnpm supabase …`).
@@ -119,7 +119,7 @@ app/admin/(auth)/login           magic-link sign-in (server action; allowlist-ch
 app/admin/auth/{callback,signout}
 app/admin/(app)/*                overview, leads, lead detail, settings, export (route) and actions
 components/site/*                Header/Rail/StickyBar (Chrome), Scenes, Preorder + PreorderForm, Specs, Faq, Footer
-components/stage/*               StoryDriver (Lenis + scroll model), useStory (Zustand), StageMount, Stage (R3F),
+components/stage/*               StoryDriver (Lenis + scroll model), useStory (Zustand), StageMount, Stage (canvas), studio.ts (three.js engine: renderer, env, bloom, frame loop),
                                  model.ts (procedural device + GLB adapter), keyframes.ts (camera keys by scene id)
 lib/settings.ts                  settings schema, defaults, gate logic, derived copy (specs, FAQ, scenes, footer)
 lib/settings-server.ts           cached settings loader (tag "settings")

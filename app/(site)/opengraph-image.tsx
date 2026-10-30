@@ -3,12 +3,12 @@ import { ImageResponse } from "next/og";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { getSettings } from "@/lib/settings-server";
-import { inr } from "@/lib/settings";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const alt = "GlowBite Water Flosser — Join the Pre-order List";
 
+// The bundled OG font has no ₹ glyph (and fetching one at build time is unreliable), so the price reads "INR".
 export default async function OpengraphImage() {
   const s = await getSettings();
   const pub = path.join(process.cwd(), "public");
@@ -26,7 +26,7 @@ export default async function OpengraphImage() {
               <span style={{ color: "rgba(236,241,245,.5)" }}>made simple.</span>
             </div>
             <div style={{ fontSize: 28, color: "rgba(236,241,245,.75)", display: "flex" }}>
-              {s.offer_active ? `Join the pre-order list · ${inr(s.price)} · No payment taken now` : "Join the pre-order list · No payment taken now"}
+              {s.offer_active ? `Join the pre-order list · INR ${s.price.toLocaleString("en-IN")} · No payment taken now` : "Join the pre-order list · No payment taken now"}
             </div>
           </div>
         </div>

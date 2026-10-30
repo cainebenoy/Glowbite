@@ -13,7 +13,7 @@ A single-product pre-order site for the Glowbite dental water flosser (Kerala/In
 5. **Children.** Only "includes a child mode; follow the product instructions and use with adult supervision". No safety claims.
 
 ## Stack (decided — do not swap without proposing first)
-Next.js 15 (App Router, TypeScript strict) · React 19 · Tailwind CSS v4 (tokens below) · @react-three/fiber + drei + @react-three/postprocessing · Lenis · Zustand · Supabase (Postgres, Auth, RLS) · Zod · Resend (email) · Cloudflare Turnstile (spam) · @vercel/analytics · Vitest · Playwright · Vercel hosting · pnpm.
+Next.js 15 (App Router, TypeScript strict) · React 19 · Tailwind CSS v4 (tokens below) · three.js (plain, with its own EffectComposer/UnrealBloomPass; R3F dropped 2026-10-30 to meet the 250 KB stage budget) · Lenis · Zustand · Supabase (Postgres, Auth, RLS) · Zod · Resend (email) · Cloudflare Turnstile (spam) · @vercel/analytics · Vitest · Playwright · Vercel hosting · pnpm.
 
 ## Design tokens (from the approved prototype)
 - Background `#000000` (true black). Panels `#0B0B0C`. Hairlines `rgba(255,255,255,.09)`.
