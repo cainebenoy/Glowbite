@@ -1,0 +1,2 @@
+// Formatting with no dependencies (safe for client bundles).
+export const inr = (n: number) => "₹" + Math.round(n).toLocaleString("en-IN");

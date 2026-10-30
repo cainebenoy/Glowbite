@@ -103,7 +103,7 @@ export function parseSettings(data: unknown): Settings {
 }
 
 // ---------------------------------------------------------------- formatting
-export const inr = (n: number) => "₹" + Math.round(n).toLocaleString("en-IN");
+export { inr } from "./format";
 
 // ---------------------------------------------------------------- derived copy
 export const NO_PAYMENT = "No payment taken now.";

@@ -50,7 +50,9 @@ test("2. every CTA reaches the form", async ({ page }, info) => {
       await expect(page.locator("#bar")).toHaveClass(/show/);
     }
     await page.locator(`[data-cta="${where}"]`).click();
-    await expect(page.locator("#formCard")).toBeInViewport({ ratio: 0.2, timeout: 8000 });
+    // the card can be taller than a phone screen: check the section heading and the card top arrive on screen
+    await expect(page.locator("#preorder-title")).toBeInViewport({ timeout: 8000 });
+    await expect(page.locator("#formCard")).toBeInViewport();
   }
 });
 

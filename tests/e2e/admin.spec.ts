@@ -17,7 +17,7 @@ test("8a. /admin redirects to login when signed out", async ({ page }) => {
 test("8b. a non-allowlisted session is rejected and signed out", async ({ page }) => {
   await signInAs(page, INTRUDER);
   await expect(page).toHaveURL(/\/admin\/login\?error=not_authorised/);
-  await expect(page.getByRole("alert")).toContainText("isn't authorised");
+  await expect(page.getByRole("alert").filter({ hasText: "isn't authorised" })).toBeVisible();
   // the session is gone: going back to /admin lands on plain login
   await page.goto("/admin");
   await expect(page).toHaveURL(/\/admin\/login$/);

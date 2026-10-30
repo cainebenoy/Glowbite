@@ -139,7 +139,12 @@ supabase/migrations, seed.sql    schema, RLS, rate-limit function; seed generate
 **Rendering:**
 - The landing page is statically generated.
 - Saving settings calls `revalidateTag("settings")`.
-- The 3D stage is a client-only dynamic import, mounted after `load` and idle, behind a still poster. Without WebGL, the poster stays.
+- The 3D stage is a client-only dynamic import behind a still poster. The poster is a render of the same hero frame (`scripts/render-poster.ts`; re-run it after changing the model).
+  - **Desktop:** the stage mounts after `load` and idle.
+  - **Phones:** it mounts on the first scroll, touch or key press. Building it costs seconds of CPU on mid-range phones, and the poster looks the same until then.
+  - **No WebGL, or Save-Data on:** the poster stays.
+- Outfit uses `font-display: optional` (preloaded). This removes the font-swap layout shift. The trade-off: a first visit on a very slow connection may show the fallback font for that page view.
+- The browser bundle keeps Zod out. Client code imports `lib/lead-rules.ts` and `lib/format.ts`, not the schema modules.
 
 **Security headers:** a fixed CSP (no nonces, so the page stays static) allowing self, Supabase, Turnstile and Vercel Analytics; plus `X-Frame-Options: DENY`, `Referrer-Policy` and a minimal `Permissions-Policy` (`next.config.ts`).
 

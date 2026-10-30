@@ -2,8 +2,8 @@
 // Pre-order interest form. Validation rules are shared with the server (lib/leads.ts).
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
-import { fieldRules, type LeadField } from "@/lib/leads";
-import { inr } from "@/lib/settings";
+import { fieldRules, type LeadField } from "@/lib/lead-rules";
+import { inr } from "@/lib/format";
 import { track } from "@/lib/analytics";
 
 type Props = {
