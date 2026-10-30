@@ -31,7 +31,7 @@ export default async function OpengraphImage() {
           </div>
         </div>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={src(product, "image/jpeg")} height={502} width={231} alt="" style={{ marginLeft: 40 }} />
+        <img src={src(product, "image/jpeg")} height={540} width={198} alt="" style={{ marginLeft: 40 }} />
       </div>
     ),
     size,

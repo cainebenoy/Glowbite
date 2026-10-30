@@ -124,17 +124,14 @@ html.lenis body {
   background: var(--void);
   pointer-events: none;
 }
+/* still render of the hero keyframe (scripts/render-poster.ts), placed where the 3D device appears */
 .fallback-prod {
   position: absolute;
-  right: 6vw;
-  top: 50%;
-  transform: translateY(-50%);
-  height: min(82vh, 760px);
+  left: 59.7vw;
+  top: 5.5vh;
+  height: 91vh;
   width: auto;
-  aspect-ratio: 520 / 1132;
-  filter: brightness(0.86) contrast(1.04);
-  -webkit-mask-image: radial-gradient(42% 52% at 50% 50%, #000 60%, transparent 100%);
-  mask-image: radial-gradient(42% 52% at 50% 50%, #000 60%, transparent 100%);
+  aspect-ratio: 300 / 820;
   transition: opacity 0.8s;
 }
 .gl-on .fallback-prod {
@@ -1063,10 +1060,10 @@ html.lenis body {
 
 @media (max-width: 860px) {
   .fallback-prod {
-    right: 50%;
-    top: 8vh;
-    transform: translateX(50%);
-    height: 46vh;
+    left: 50%;
+    top: 4vh;
+    transform: translateX(-50%);
+    height: 58vh;
   }
   .pin {
     align-items: flex-end;

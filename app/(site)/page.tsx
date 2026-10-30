@@ -66,7 +66,7 @@ export default async function Page() {
         <style>{`.beats{display:flex;flex-direction:column;gap:3rem}.beat{opacity:1;transform:none}.scene.tall{height:auto}.scene.tall .pin{position:relative;height:auto;padding-block:20vh}`}</style>
       </noscript>
       <div className="fallback-bg" aria-hidden="true">
-        <Image className="fallback-prod" src={poster} alt="" sizes="(max-width: 860px) 22vh, 360px" />
+        <Image className="fallback-prod" src={poster} alt="" sizes="(max-width: 860px) 22vh, 34vh" />
       </div>
       <StageMount hasGlb={HAS_GLB} />
       <ProgressLine />
