@@ -30,6 +30,8 @@ export function PreorderForm({ brand, price, offerActive, maxQty, privacyHref }:
   const [formError, setFormError] = useState("");
   const [view, setView] = useState<View>("form");
   const [token, setToken] = useState("");
+  // Turnstile loads Cloudflare's script + iframe; only mount it as the form approaches the viewport
+  const [nearForm, setNearForm] = useState(false);
   const started = useRef(false);
   const formRef = useRef<HTMLFormElement>(null);
   const doneRef = useRef<HTMLDivElement>(null);
@@ -59,6 +61,29 @@ export function PreorderForm({ brand, price, offerActive, maxQty, privacyHref }:
     io.observe(el);
     return () => io.disconnect();
   }, []);
+
+  useEffect(() => {
+    const el = formRef.current;
+    if (!el || !SITE_KEY) return;
+    if (!("IntersectionObserver" in window)) return setNearForm(true);
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setNearForm(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "1200px 0px" },
+    );
+    io.observe(el);
+    // anyone who starts typing gets the widget straight away
+    const onFocus = () => setNearForm(true);
+    el.addEventListener("focusin", onFocus);
+    return () => {
+      io.disconnect();
+      el.removeEventListener("focusin", onFocus);
+    };
+  }, [view]);
 
   useEffect(() => {
     if (view !== "form") doneRef.current?.focus({ preventScroll: true });
@@ -248,7 +273,7 @@ export function PreorderForm({ brand, price, offerActive, maxQty, privacyHref }:
               </>
             ) : null}
           </p>
-          {SITE_KEY && (
+          {SITE_KEY && nearForm && (
             <Turnstile
               ref={turnstileRef}
               siteKey={SITE_KEY}

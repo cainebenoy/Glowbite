@@ -23,6 +23,50 @@ test("8b. a non-allowlisted session is rejected and signed out", async ({ page }
   await expect(page).toHaveURL(/\/admin\/login$/);
 });
 
+test("8d. the real magic-link flow signs an allowlisted admin in (email via Mailpit)", async ({ page }) => {
+  const MAILPIT = "http://127.0.0.1:54324";
+  const inbox = async () =>
+    ((await (await page.request.get(`${MAILPIT}/api/v1/messages`)).json()) as { messages: { ID: string; To: { Address: string }[]; Created: string }[] })
+      .messages.filter((m) => m.To.some((t) => t.Address.toLowerCase() === TEST_ADMIN));
+  const before = new Set((await inbox()).map((m) => m.ID));
+
+  await page.goto("/admin/login");
+  await page.getByLabel("Admin email").fill(TEST_ADMIN);
+  await page.getByRole("button", { name: "Email me a sign-in link" }).click();
+  await expect(page.getByRole("status")).toContainText("sign-in link is on its way");
+
+  let id = "";
+  await expect
+    .poll(async () => {
+      id = (await inbox()).find((m) => !before.has(m.ID))?.ID ?? "";
+      return id;
+    }, { timeout: 20_000 })
+    .not.toBe("");
+  const msg = (await (await page.request.get(`${MAILPIT}/api/v1/message/${id}`)).json()) as { Text: string; HTML: string };
+  const link = (msg.HTML.match(/href="([^"]*\/auth\/v1\/verify[^"]*)"/)?.[1] ?? msg.Text.match(/(https?:\/\/\S*\/auth\/v1\/verify\S*)/)?.[1] ?? "").replace(/&amp;/g, "&");
+  expect(link, "magic link in email").toContain("/auth/v1/verify");
+
+  await page.goto(link);
+  await expect(page).toHaveURL(/\/admin$/);
+  await expect(page.getByRole("heading", { name: "Overview" })).toBeVisible();
+  await expect(page.getByText(TEST_ADMIN)).toBeVisible();
+});
+
+test("8e. a non-allowlisted email gets the same reply but no email", async ({ page }) => {
+  const MAILPIT = "http://127.0.0.1:54324";
+  const count = async () =>
+    ((await (await page.request.get(`${MAILPIT}/api/v1/messages`)).json()) as { messages: { To: { Address: string }[] }[] }).messages.filter(
+      (m) => m.To.some((t) => t.Address.toLowerCase() === INTRUDER),
+    ).length;
+  const before = await count();
+  await page.goto("/admin/login");
+  await page.getByLabel("Admin email").fill(INTRUDER);
+  await page.getByRole("button", { name: "Email me a sign-in link" }).click();
+  await expect(page.getByRole("status")).toContainText("sign-in link is on its way");
+  await page.waitForTimeout(2000);
+  expect(await count()).toBe(before);
+});
+
 test("8c. an allowlisted admin sees leads and can export CSV", async ({ page }) => {
   await service()
     .from("leads")
