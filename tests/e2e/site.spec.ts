@@ -9,7 +9,8 @@ test("1. landing renders the full text content with JavaScript disabled", async 
   const ctx = await browser.newContext({ javaScriptEnabled: false });
   const page = await ctx.newPage();
   await page.goto("/");
-  const text = await page.locator("body").innerText();
+  // textContent (whitespace-collapsed): WebKit's innerText drops the space where the headline wraps between word spans
+  const text = ((await page.locator("body").textContent()) ?? "").replace(/\s+/g, " ");
   for (const s of [
     "A fresher-feeling clean, made simple.",
     "Discover the GlowBite Water Flosser",
@@ -51,7 +52,7 @@ test("2. every CTA reaches the form", async ({ page }, info) => {
     }
     await page.locator(`[data-cta="${where}"]`).click();
     // the card can be taller than a phone screen: check the section heading and the card top arrive on screen
-    await expect(page.locator("#preorder-title")).toBeInViewport({ timeout: 8000 });
+    await expect(page.locator("#preorder-title")).toBeInViewport({ timeout: 20_000 }); // headroom: the 3D scene builds on first scroll (slow under software WebGL in CI)
     await expect(page.locator("#formCard")).toBeInViewport();
   }
 });

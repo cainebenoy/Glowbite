@@ -3,6 +3,8 @@ import type { NextConfig } from "next";
 const isDev = process.env.NODE_ENV !== "production";
 const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseWs = supabase.replace(/^http/, "ws");
+// Only on https sites: WebKit (unlike Chromium) also upgrades http://localhost, which breaks local runs.
+const httpsSite = (process.env.NEXT_PUBLIC_SITE_URL || "").startsWith("https://");
 
 // Fixed CSP (no per-request nonces) so the landing page stays statically rendered.
 // Allows only: this site, Supabase, Cloudflare Turnstile and Vercel Analytics. Fonts are self-hosted by next/font.
@@ -19,7 +21,7 @@ const csp = [
   "base-uri 'self'",
   "form-action 'self'",
   "frame-ancestors 'none'",
-  ...(isDev ? [] : ["upgrade-insecure-requests"]),
+  ...(httpsSite ? ["upgrade-insecure-requests"] : []),
 ].join("; ");
 
 const securityHeaders = [
