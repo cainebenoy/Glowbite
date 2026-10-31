@@ -14,6 +14,8 @@ async function run(name: string, viewport: { width: number; height: number }, is
   const page = await browser.newPage({ viewport, isMobile, hasTouch: isMobile, deviceScaleFactor: isMobile ? 2 : 1 });
   page.on("console", (m) => m.type() === "error" && console.log(`[${name}] console:`, m.text()));
   await page.goto(base, { waitUntil: "load" });
+  await page.waitForTimeout(2500); // hydrate; phones mount the stage on first scroll
+  await page.evaluate(() => window.scrollTo(0, 1));
   await page.waitForFunction(() => document.documentElement.classList.contains("gl-on"), null, { timeout: 30000 }).catch(() => console.log("no gl-on"));
   for (const id of SCENES) {
     const y = await page.evaluate((sid) => {
@@ -28,8 +30,18 @@ async function run(name: string, viewport: { width: number; height: number }, is
   await browser.close();
 }
 
+// widths from the spec: 360, 390, 414, 768, 1024, 1440, 1920
+const SIZES: [string, number, number, boolean][] = [
+  ["w360", 360, 780, true],
+  ["phone", 390, 844, true],
+  ["w768", 768, 1024, true],
+  ["w1024", 1024, 768, false],
+  ["desktop", 1440, 900, false],
+  ["w1920", 1920, 1080, false],
+];
+const only = process.argv[4]?.split(",");
+
 (async () => {
-  await run("desktop", { width: 1440, height: 900 }, false);
-  await run("phone", { width: 390, height: 844 }, true);
+  for (const [name, w, h, mobile] of SIZES) if (!only || only.includes(name)) await run(name, { width: w, height: h }, mobile);
   console.log("shots in", out);
 })();

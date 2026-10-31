@@ -1,7 +1,8 @@
 // Landing page. Static; rebuilt when an admin saves settings (revalidateTag("settings")).
 import type { Metadata } from "next";
-import Image from "next/image";
+import { getImageProps } from "next/image";
 import poster from "@/public/poster.jpg";
+import posterPhone from "@/public/poster-phone.jpg";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { getSettings } from "@/lib/settings-server";
@@ -27,6 +28,20 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: { type: "website", title, description, locale: "en_IN", siteName: s.brand_name },
     twitter: { card: "summary_large_image", title, description },
   };
+}
+
+/** Still renders of the hero frame (scripts/render-poster.ts): phone and desktop framings, art-directed. */
+function Poster() {
+  const common = { alt: "", priority: true, fetchPriority: "high" as const };
+  const { props: phone } = getImageProps({ ...common, src: posterPhone, sizes: "24vh" });
+  const { props: desk } = getImageProps({ ...common, src: poster, sizes: "34vh" });
+  return (
+    <picture>
+      <source media="(max-width: 860px)" srcSet={phone.srcSet} sizes={phone.sizes} />
+      {/* eslint-disable-next-line jsx-a11y/alt-text -- decorative; alt="" comes from props */}
+      <img {...desk} className="fallback-prod" />
+    </picture>
+  );
 }
 
 function SceneFor({ id, s }: { id: SceneId; s: Settings }) {
@@ -66,7 +81,7 @@ export default async function Page() {
         <style>{`.beats{display:flex;flex-direction:column;gap:3rem}.beat{opacity:1;transform:none}.scene.tall{height:auto}.scene.tall .pin{position:relative;height:auto;padding-block:20vh}`}</style>
       </noscript>
       <div className="fallback-bg" aria-hidden="true">
-        <Image className="fallback-prod" src={poster} alt="" sizes="(max-width: 860px) 22vh, 34vh" priority fetchPriority="high" />
+        <Poster />
       </div>
       <StageMount hasGlb={HAS_GLB} />
       <ProgressLine />

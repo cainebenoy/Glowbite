@@ -195,7 +195,7 @@ If the GLB fails to load, the procedural model is used and a console warning is 
 2. In Supabase Auth settings:
    - Set **Site URL** to the production URL.
    - Add `https://<domain>/admin/auth/callback` to the redirect URLs.
-   - Disable sign-ups.
+   - Turn off "Allow new users to sign up", but keep the **Email** provider enabled (magic links need it).
    - Configure custom SMTP so magic links are delivered reliably.
 3. Add each admin: insert into `admins`, then invite the user (see "Adding an admin").
 4. Import the repo into Vercel and set the environment variables above for Production and Preview. Preview deployments run automatically on pull requests.

@@ -159,16 +159,17 @@ export function createStudio(canvas: HTMLCanvasElement, onFirstFrame: () => void
     drops: [] as { p: THREE.Vector3; v: THREE.Vector3; life: number; r: number }[],
   };
   const tmp = { v: new THREE.Vector3(), d: new THREE.Vector3(), o: new THREE.Vector3(), q: new THREE.Quaternion(), j: new THREE.Vector3(), dummy: new THREE.Object3D() };
-  const clock = new THREE.Clock();
+  const timer = new THREE.Timer();
   let raf = 0;
   let running = false;
 
   function frame() {
     raf = requestAnimationFrame(frame);
     if (!device) return;
-    const rawDt = clock.getDelta();
+    timer.update();
+    const rawDt = timer.getDelta();
     const dt = Math.min(rawDt, 0.05);
-    const time = clock.elapsedTime;
+    const time = timer.getElapsed();
     const ST = useStory.getState();
     const reduced = ST.reduced;
     const s = st;
@@ -185,7 +186,9 @@ export function createStudio(canvas: HTMLCanvasElement, onFirstFrame: () => void
       k1 = KEYS[ids[i1]!];
     for (const k of KEY_NAMES) s.tg[k] = k0[k] + (k1[k] - k0[k]) * f;
     if (isMobile()) {
-      const a = Math.min(1, innerWidth / innerHeight);
+      // The prototype scaled distance by aspect ratio; pinning it to the 390x844 reference framing keeps
+      // the device the same on-screen size on every phone/tablet layout (and matching poster-phone.jpg).
+      const a = 390 / 844;
       s.tg.mx = 0;
       s.tg.dist *= 1 + 0.95 * (1 - a);
       s.tg.tgt -= 0.075 * s.tg.dist;
@@ -322,7 +325,7 @@ export function createStudio(canvas: HTMLCanvasElement, onFirstFrame: () => void
       if (on === running) return;
       running = on;
       if (on) {
-        clock.getDelta(); // don't jump after a pause
+        timer.update(); // don't jump after a pause
         raf = requestAnimationFrame(frame);
       } else cancelAnimationFrame(raf);
     },

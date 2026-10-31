@@ -1059,11 +1059,13 @@ html.lenis body {
 }
 
 @media (max-width: 860px) {
+  /* phone framing: public/poster-phone.jpg matches the centred 3D hero */
   .fallback-prod {
     left: 50%;
-    top: 4vh;
+    top: 5.33vh;
     transform: translateX(-50%);
-    height: 58vh;
+    height: 62.8vh;
+    aspect-ratio: 200 / 530;
   }
   .pin {
     align-items: flex-end;
