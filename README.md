@@ -202,6 +202,9 @@ If the GLB fails to load, the procedural model is used and a console warning is 
   - **Resend:** the team and customer emails are skipped until it's set.
   - **Custom SMTP:** magic links use Supabase's built-in mailer, which is rate-limited to a few emails an hour.
 
+### Continuous integration
+GitHub Actions (`.github/workflows/ci.yml`) runs lint, type-check, unit tests and a production build on every push to `main` and on every pull request. The DB and e2e suites need Docker and local Supabase, so run those locally before merging.
+
 ### Deploying (Vercel + Supabase cloud)
 1. Create a Supabase project. Then run `pnpm supabase link --project-ref <ref>` and `pnpm supabase db push`, and run `supabase/seed.sql` in the SQL editor.
 2. In Supabase Auth settings:

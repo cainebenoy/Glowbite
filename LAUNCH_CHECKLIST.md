@@ -48,5 +48,4 @@ Tick everything before the site goes public. Items marked *(settings)* are chang
 - [ ] Real-device test: scroll the whole story, submit a lead, check it in `/admin`, export CSV, flip a claim gate and see the page update
 - [ ] On a mid-range Android phone and an iPhone, check the first scroll stays smooth. Phones build the 3D scene on the first interaction; the poster shows until then
 - [ ] Check the brand font on a first visit over a slow connection. Outfit uses `font-display: optional`, so a very slow first load may show the fallback font for that page view
-- [ ] Glowbite to accept the social preview showing the price as "INR 1,299" (the image font has no ₹ glyph; the page itself shows ₹)
 - [ ] After any change to the 3D model, re-render the posters: `pnpm start`, then `pnpm tsx scripts/render-poster.ts`

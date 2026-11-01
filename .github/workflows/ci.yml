@@ -1,0 +1,32 @@
+# Fast checks on every push and pull request. Vercel builds previews/production separately.
+# The DB and e2e suites need Docker + local Supabase; run them locally (see README "Tests").
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test:unit
+      # no Supabase env: the page builds with the seed defaults, which is what we want to check here
+      - run: pnpm build

@@ -29,7 +29,6 @@ The Glowbite pre-order site is built end to end per `BUILD_PROMPT.md` and `CLAUD
 Each of these is also listed in LAUNCH_CHECKLIST.
 - **3D starts on the first interaction on phones** (scroll, touch or key). Building the scene costs seconds of CPU on mid-range phones. Until then, a poster rendered from the same 3D frame is shown, art-directed for phone and desktop so the handoff doesn't jump. Desktop starts the 3D after load and idle. Save-Data visitors keep the poster.
 - **Outfit uses `font-display: optional`.** This removes the font-swap layout shift. A first visit on a very slow connection may show the fallback font for that page view.
-- **The social preview image shows the price as "INR 1,299".** The image font has no ₹ glyph, and fetching one at build time was unreliable. The page itself shows ₹.
 - **Turnstile loads only when the form nears the viewport,** or when a field gets focus.
 
 ### Improvements to the 3D model over the prototype
@@ -39,6 +38,16 @@ Each of these is also listed in LAUNCH_CHECKLIST.
 - The printed logo uses a sharper texture.
 - MSAA anti-aliasing works through the bloom pipeline.
 - Phone and tablet framing is consistent across screen sizes.
+
+## After launch (2026-11-02)
+- **Live:** https://glowbite-rosy.vercel.app
+  - Vercel Hobby on cainebenoy@gmail.com.
+  - Free Supabase project `npafkbkppipklpfihrqh` in the personal org "Glowbite".
+  - Verified with a real lead (saved, then deleted), the admin gate, RLS and the sitemap URL.
+- **Lighthouse on the live site (mobile, 3 runs):** performance 0.93–0.99, LCP 2.0–2.4 s, CLS 0, accessibility 0.97, SEO 100.
+- **Spam protection is off for now:** `TURNSTILE_DISABLED=true` stands in until Turnstile keys exist (the owner chose this).
+- **Social preview** now uses Outfit, with a one-glyph Noto Sans fallback for ₹ (Outfit has no ₹ glyph).
+- **CI:** GitHub Actions runs lint, type-check, unit tests and a production build on every push and pull request.
 
 ## Bugs found and fixed by testing
 - **Magic-link sign-in was broken:** `[auth.email] enable_signup = false` turns off the email provider entirely in Supabase. Sign-ups are now blocked by `[auth] enable_signup = false` instead, and the README deploy steps say to keep the Email provider on.
