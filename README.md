@@ -93,6 +93,7 @@ Only the Supabase variables are required. Email, webhook and Turnstile log `skip
 | `RESEND_API_KEY`, `MAIL_FROM` | Team + customer emails |
 | `TEAM_WEBHOOK_URL` | Optional Slack/Discord webhook |
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET` | Spam protection. Verification is skipped only when the secret is unset outside Vercel production |
+| `TURNSTILE_DISABLED` | `true` = temporary, explicit opt-out of Turnstile in production (logged on every submit). Remove once the Turnstile keys are set |
 | `NEXT_PUBLIC_SITE_URL` | Canonical URL, sitemap, email links |
 | `RATE_LIMIT_MAX` | Optional, default 5 submissions per IP per 10 minutes |
 
@@ -190,6 +191,16 @@ If the GLB fails to load, the procedural model is used and a console warning is 
 - `tests/e2e`: the 10 scenarios from the build spec, on both device profiles.
   - Uses Cloudflare's always-pass Turnstile test keys and mints admin sessions with the service role (no inbox needed).
   - Runs serially because tests share the database and rate-limit bucket.
+
+### Current deployment
+- **Site:** https://glowbite-rosy.vercel.app (Vercel project `glowbite`, cainebenoy's Hobby account). It deploys from `main` on GitHub.
+- **Database:** Supabase project `npafkbkppipklpfihrqh` ("glowbite"), Free plan, in the org "Glowbite" on cainebenoy's personal Supabase account, region Mumbai.
+  - Production Auth settings live in `[remotes.production]` in `supabase/config.toml`. Apply them with `pnpm supabase config push --project-ref npafkbkppipklpfihrqh`.
+  - Schema changes: `pnpm supabase db push --linked`.
+- **Not set yet:**
+  - **Turnstile:** `TURNSTILE_DISABLED=true` is set instead.
+  - **Resend:** the team and customer emails are skipped until it's set.
+  - **Custom SMTP:** magic links use Supabase's built-in mailer, which is rate-limited to a few emails an hour.
 
 ### Deploying (Vercel + Supabase cloud)
 1. Create a Supabase project. Then run `pnpm supabase link --project-ref <ref>` and `pnpm supabase db push`, and run `supabase/seed.sql` in the SQL editor.

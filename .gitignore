@@ -49,3 +49,6 @@ next-env.d.ts
 /.lighthouseci/
 supabase/.temp/
 supabase/.branches/
+
+.vercel
+.env*

@@ -16,6 +16,12 @@ export function hashIp(ip: string): string {
 export async function verifyTurnstile(token: string, ip: string): Promise<{ ok: boolean; skipped?: boolean }> {
   const secret = process.env.TURNSTILE_SECRET;
   if (!secret) {
+    // Explicit, temporary opt-out for launching before Turnstile keys exist. Rate limiting and the
+    // honeypot still apply. Remove TURNSTILE_DISABLED once the keys are set.
+    if (process.env.TURNSTILE_DISABLED === "true") {
+      console.warn("[turnstile] DISABLED by TURNSTILE_DISABLED=true; set the Turnstile keys and remove it");
+      return { ok: true, skipped: true };
+    }
     if (process.env.NODE_ENV === "production" && process.env.VERCEL_ENV === "production") {
       console.error("[turnstile] TURNSTILE_SECRET missing in production; rejecting");
       return { ok: false };

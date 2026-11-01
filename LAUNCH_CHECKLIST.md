@@ -38,7 +38,7 @@ Tick everything before the site goes public. Items marked *(settings)* are chang
 - [ ] Policies published: at minimum the **Privacy Notice** (mention Vercel Web Analytics, cookieless) *(settings)*
 - [ ] `consent_text_version` updated whenever the consent wording or privacy notice changes *(settings)*
 - [ ] `team_notify_emails` set *(settings: Notifications)*; `RESEND_API_KEY` and `MAIL_FROM` set, with the sending domain verified in Resend
-- [ ] Turnstile keys set (`NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET`) for the production domain
+- [ ] Turnstile keys set (`NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET`) for the production domain, **and `TURNSTILE_DISABLED` removed** from Vercel (it is currently `true`). Redeploy afterwards
 - [ ] `IP_HASH_SALT` set to a long random value
 - [ ] `NEXT_PUBLIC_SITE_URL` set to the production URL
 - [ ] Supabase Auth: Site URL + `/admin/auth/callback` redirect set, sign-ups disabled, custom SMTP configured
