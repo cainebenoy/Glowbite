@@ -17,7 +17,8 @@
     "test:db": "vitest run tests/db",
     "test:e2e": "playwright test",
     "lhci": "lhci autorun",
-    "poster": "tsx scripts/render-poster.ts"
+    "poster": "tsx scripts/render-poster.ts",
+    "test:e2e:webkit": "playwright test -c playwright.webkit.config.ts"
   },
   "dependencies": {
     "@marsidev/react-turnstile": "^1.6.3",

@@ -51,9 +51,17 @@ test("2. every CTA reaches the form", async ({ page }, info) => {
       await expect(page.locator("#bar")).toHaveClass(/show/);
     }
     await page.locator(`[data-cta="${where}"]`).click();
-    // the card can be taller than a phone screen: check the section heading and the card top arrive on screen
-    await expect(page.locator("#preorder-title")).toBeInViewport({ timeout: 20_000 }); // headroom: the 3D scene builds on first scroll (slow under software WebGL in CI)
-    await expect(page.locator("#formCard")).toBeInViewport();
+    // The card can be taller than a phone screen, so check the section heading and the card top arrive on
+    // screen. Measured with getBoundingClientRect: toBeInViewport (IntersectionObserver) misreports under
+    // WebKit's mobile emulation even when the heading is plainly visible.
+    const onScreen = (sel: string) =>
+      page.evaluate((s) => {
+        const r = document.querySelector(s)!.getBoundingClientRect();
+        return r.top >= 0 && r.top < innerHeight;
+      }, sel);
+    // headroom: phones build the 3D scene on first scroll (slow under software WebGL in CI)
+    await expect.poll(() => onScreen("#preorder-title"), { timeout: 20_000 }).toBe(true);
+    await expect.poll(() => onScreen("#formCard")).toBe(true);
   }
 });
 

@@ -105,7 +105,8 @@ Only the Supabase variables are required. Email, webhook and Turnstile log `skip
 | `pnpm db:reset` | Re-apply migrations and seed, then seed admins |
 | `pnpm db:types` | Generate `lib/supabase/types.ts` from the local schema |
 | `pnpm test` | Unit + DB tests (Vitest; DB tests need local Supabase) |
-| `pnpm test:e2e` | Playwright on desktop and iPhone 13 profiles (builds and starts the app) |
+| `pnpm test:e2e` | Playwright on desktop and iPhone 13 profiles (Chromium; builds and starts the app) |
+| `pnpm test:e2e:webkit` | The same suite on the iPhone 13 profile in real WebKit (Safari's engine). Run `pnpm exec playwright install webkit` once |
 | `pnpm lhci` | Lighthouse CI on the built landing page (run `pnpm build` first) |
 | `pnpm tsx scripts/gen-seed.ts` | Regenerate `supabase/seed.sql` from `DEFAULT_SETTINGS` |
 
