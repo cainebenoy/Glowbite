@@ -2,4 +2,5 @@
 import { devices } from "@playwright/test";
 import base from "./playwright.config";
 
-export default { ...base, projects: [{ name: "iphone-13-webkit", use: { ...devices["iPhone 13"] } }] };
+const config = { ...base, projects: [{ name: "iphone-13-webkit", use: { ...devices["iPhone 13"] } }] };
+export default config;

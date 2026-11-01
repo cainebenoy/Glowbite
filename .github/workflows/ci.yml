@@ -26,7 +26,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
-      - run: pnpm typecheck
       - run: pnpm test:unit
-      # no Supabase env: the page builds with the seed defaults, which is what we want to check here
+      # `next build` also type-checks (it generates next-env.d.ts first). No Supabase env: the page builds
+      # with the seed defaults, which is what we want to check here.
       - run: pnpm build
